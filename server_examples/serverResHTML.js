@@ -7,8 +7,8 @@ const server = http.createServer((req, res) => {
   console.log('req.url:', req.url);
   console.log('req.method:', req.method);
 
-  /** Set header content type */
-  res.setHeader('Content-tyle', 'text/html');
+  /** Set header content tyle */
+  res.setHeader('Content-Type', 'text/html');
 
   /** Send static html file */
   if (req.url === '/static') {

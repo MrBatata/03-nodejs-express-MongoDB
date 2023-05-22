@@ -3,7 +3,7 @@ const http = require('http');
 const server = http.createServer((req, res) => {
   console.log('req.url:', req.url);
   console.log('req.method:', req.method);
-  res.setHeader('Content-tyle', 'text/html');
+  res.setHeader('Content-Type', 'text/html');
   res.write('<p>Hi</p>');
   res.write('<h1>Batata</h1>')
   res.end();
