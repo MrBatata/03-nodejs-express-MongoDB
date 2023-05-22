@@ -1,0 +1,15 @@
+{
+  "name": "03-nodejs-express-mongodb",
+  "description": "1- NodeJS\r 2- Express\r 3- MongoDB",
+  "version": "1.0.0",
+  "main": "./server/serverResHTML.js",
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
