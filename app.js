@@ -1,18 +1,31 @@
 const express = require('express');
 
 /** Morgan middleware: logger
- * 3rd party
+ * 3rd party middleware
  */
 const morgan = require('morgan');
+
+/** Mongoose: easier to use mongodb */
+const mongoose = require('mongoose');
+const Blog = require('./models/blog');
 
 /** Express app */
 const app = express();
 
 /** MongoDB user connection */
-const URI = 'mongodb+srv://user01:user01@03-nodejs-express-mongo.jb6rogh.mongodb.net/?retryWrites=true&w=majority';
-
-/** Listen for requests */
-app.listen(3000);
+const testURI = 'mongodb+srv://user01:user01@03-nodejs-express-mongo.jb6rogh.mongodb.net/?retryWrites=true&w=majority';
+const dbName = 'node-db-example';
+const dbURI = `mongodb+srv://user01:user01@03-nodejs-express-mongo.jb6rogh.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((res) => {
+    console.log('connected to db')
+    /** Server Listener for requests
+     * I would only want the server to start listening if we succesfully connect to db
+     */
+    app.listen(3000)
+  }
+  )
+  .catch((err) => console.log(err))
 
 /** EJS package
  * Register view engine to use 
@@ -67,12 +80,61 @@ app.use((req, res, next) => {
   next();
 });
 
+/** Routes continue */
 app.get('/about', (req, res) => {
   res.render('about', { title: 'About' });
 });
 
 app.get('/blogs/create', (req, res) => {
   res.render('create', { title: 'Create a new blog' });
+});
+
+/** Routes with mongo & mongoose */
+// mongoose & mongo tests
+app.get('/add-blog', (req, res) => {
+  const blog = new Blog({
+    title: 'new blog',
+    snippet: 'about my new blog',
+    body: 'more about my new blog'
+  })
+
+  blog.save()
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+app.get('/all-blogs', (req, res) => {
+  Blog.find()
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+app.get('/single-blog', (req, res) => {
+  Blog.findById('646cd288318ec45ee8af043d')
+    .then(result => {
+      res.send(result);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+app.get('/blogs', (req, res) => {
+  Blog.find().sort({ createdAt: -1 })
+    .then(result => {
+      res.render('index', { blogs: result, title: 'All blogs' });
+    })
+    .catch(err => {
+      console.log(err);
+    });
 });
 
 /** 404 page */
