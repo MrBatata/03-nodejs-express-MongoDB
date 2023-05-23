@@ -16,6 +16,7 @@ const blogSchema = new Schema({
   },
 }, { timestamps: true });
 
+/** Connection with db specific collection */
 // mongoose will plurilize 'Blog' to 'blogs' and look for that db
 const Blog = mongoose.model('Blog', blogSchema);
 module.exports = Blog;

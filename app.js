@@ -23,8 +23,7 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
      * I would only want the server to start listening if we succesfully connect to db
      */
     app.listen(3000)
-  }
-  )
+  })
   .catch((err) => console.log(err))
 
 /** EJS package
@@ -35,23 +34,26 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.set('view engine', 'ejs');
 // app.set('views', 'myviews');
 
-/** Static files middleware
+/** Express middlewares - Static Files
  * Now we are able to access 'public' from browser
  */
 app.use(express.static('public'));
 
+/** Express middlewares - data from forms */
+app.use(express.urlencoded({ extended: true }))
+
 /** Custom middleware */
 app.use((req, res, next) => {
-  console.log('new request made:');
-  console.log('host: ', req.hostname);
-  console.log('path: ', req.path);
-  console.log('method: ', req.method);
+  // console.log('new request made:');
+  // console.log('host: ', req.hostname);
+  // console.log('path: ', req.path);
+  // console.log('method: ', req.method);
   // Need a command to escape the .use()
   next();
 });
 
 app.use((req, res, next) => {
-  console.log('in the next middleware');
+  // console.log('in the next middleware');
   next();
 });
 
@@ -64,19 +66,14 @@ app.use(morgan('dev'));
  * Express automatically sets server statusCode and setHeader Content-Type
  */
 app.get('/', (req, res) => {
-  const blogs = [
-    { title: 'Yoshi finds eggs', snippet: 'Lorem ipsum dolor sit amet consectetur' },
-    { title: 'Mario finds stars', snippet: 'Lorem ipsum dolor sit amet consectetur' },
-    { title: 'How to defeat bowser', snippet: 'Lorem ipsum dolor sit amet consectetur' },
-  ];
-  res.render('index', { title: 'Home', blogs: blogs });
+  res.redirect('/blogs');
 });
 
 /** Middleware won't be executed if req to '/'
  * As the response would stop the code execution
  */
 app.use((req, res, next) => {
-  console.log('not showed if in home');
+  // console.log('not showed if in home');
   next();
 });
 
@@ -89,14 +86,50 @@ app.get('/blogs/create', (req, res) => {
   res.render('create', { title: 'Create a new blog' });
 });
 
-/** Routes with mongo & mongoose */
-// mongoose & mongo tests
-app.get('/add-blog', (req, res) => {
+/** Blogs route */
+app.get('/blogs', (req, res) => {
+  Blog.find().sort({ createdAt: -1 })
+    .then(result => {
+      res.render('index', { blogs: result, title: 'All blogs' });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+app.post('/blogs', (req, res) => {
+  // previously need express middleware to handle body
+  // console.log(req.body);
   const blog = new Blog({
-    title: 'new blog',
-    snippet: 'about my new blog',
-    body: 'more about my new blog'
-  })
+    title: req.body.title,
+    snippet: req.body.snippet,
+    body: req.body.body
+  });
+
+  blog.save()
+    .then(result => {
+      // res.send(result); // we don't want to show the created blog object on the brower
+      // blog and response are the same
+      // console.log('sent response', result);
+      // console.log('created blog', blog);
+      // console.log(blog === result);
+      res.redirect('/blogs');
+    })
+    .catch(err => {
+      console.log(err);
+    });
+})
+
+/** Interact with mongo & mongoose */
+app.get('/add-blog', (req, res) => {
+  // const blog = new Blog({
+  //   title: 'new blog',
+  //   snippet: 'about my new blog',
+  //   body: 'more about my new blog'
+  // })
+
+  // same as...
+  const blog = new Blog(req.body);
 
   blog.save()
     .then(result => {
@@ -107,35 +140,30 @@ app.get('/add-blog', (req, res) => {
     });
 });
 
-app.get('/all-blogs', (req, res) => {
-  Blog.find()
-    .then(result => {
-      res.send(result);
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+app.post('/post', (req, res) => {
+  console.log('hi');
+})
 
-app.get('/single-blog', (req, res) => {
-  Blog.findById('646cd288318ec45ee8af043d')
-    .then(result => {
-      res.send(result);
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
 
-app.get('/blogs', (req, res) => {
-  Blog.find().sort({ createdAt: -1 })
-    .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs' });
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+// app.get('/all-blogs', (req, res) => {
+//   Blog.find()
+//     .then(result => {
+//       res.send(result);
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// });
+
+// app.get('/single-blog', (req, res) => {
+//   Blog.findById('646cd288318ec45ee8af043d')
+//     .then(result => {
+//       res.send(result);
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// });
 
 /** 404 page */
 app.use((req, res) => {

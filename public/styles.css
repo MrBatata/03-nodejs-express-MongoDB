@@ -76,6 +76,8 @@
     }
     textarea{
       height: 120px;
+      font-family: inherit;
+        font-size: inherit;
     }
     .create-blog button{
       margin-top: 20px;
