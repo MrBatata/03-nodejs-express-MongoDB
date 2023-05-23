@@ -1,17 +1,51 @@
 const express = require('express');
 
+/** Morgan middleware: logger
+ * 3rd party
+ */
+const morgan = require('morgan');
+
 /** Express app */
 const app = express();
+
+/** MongoDB user connection */
+const URI = 'mongodb+srv://user01:user01@03-nodejs-express-mongo.jb6rogh.mongodb.net/?retryWrites=true&w=majority';
 
 /** Listen for requests */
 app.listen(3000);
 
-/** Register view engine
+/** EJS package
+ * Register view engine to use 
  * Default folder for ejs files is 'views'
  * If some other name, need to set as commented below
  */
 app.set('view engine', 'ejs');
 // app.set('views', 'myviews');
+
+/** Static files middleware
+ * Now we are able to access 'public' from browser
+ */
+app.use(express.static('public'));
+
+/** Custom middleware */
+app.use((req, res, next) => {
+  console.log('new request made:');
+  console.log('host: ', req.hostname);
+  console.log('path: ', req.path);
+  console.log('method: ', req.method);
+  // Need a command to escape the .use()
+  next();
+});
+
+app.use((req, res, next) => {
+  console.log('in the next middleware');
+  next();
+});
+
+/** Morgan middleware
+ * consoles log response status and ms
+ */
+app.use(morgan('dev'));
 
 /** Routes
  * Express automatically sets server statusCode and setHeader Content-Type
@@ -23,6 +57,14 @@ app.get('/', (req, res) => {
     { title: 'How to defeat bowser', snippet: 'Lorem ipsum dolor sit amet consectetur' },
   ];
   res.render('index', { title: 'Home', blogs: blogs });
+});
+
+/** Middleware won't be executed if req to '/'
+ * As the response would stop the code execution
+ */
+app.use((req, res, next) => {
+  console.log('not showed if in home');
+  next();
 });
 
 app.get('/about', (req, res) => {

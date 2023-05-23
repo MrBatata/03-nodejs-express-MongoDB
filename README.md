@@ -10,4 +10,20 @@ https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU
 `npx nodemon server.js` (need npx if not installed globally)
 
 # Lodash -> library
-`npm i --save lodash` 
+`npm i lodash --save` 
+
+# Express
+`npm i express --save`
+Indroduction and static files serve
+
+# Middlewares: morgan (logger)
+Not very necessary
+
+# MongoDB
+NoSQL database.
+Can be installed on local machine or use cloud service.
+Cloud: https://www.mongodb.com/atlas
+
+# Mongoose 
+Library to help handle MongoDB
+
