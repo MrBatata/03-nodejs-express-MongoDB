@@ -118,7 +118,30 @@ app.post('/blogs', (req, res) => {
     .catch(err => {
       console.log(err);
     });
-})
+});
+
+app.get('/blogs/:id', (req, res) => {
+  const id = req.params.id;
+  // console.log(id);
+  Blog.findById(id)
+    .then(result => {
+      // console.log(result);
+      res.render('details', { blog: result, title: 'Selected Blog' });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
+
+app.delete('/blogs/:id', (req, res) => {
+  const id = req.params.id;
+
+  Blog.findByIdAndDelete(id)
+    .then(result => {
+      res.json({ backtoblogs: '/blogs' });
+    })
+    .catch(err => console.log(err));
+});
 
 /** Interact with mongo & mongoose */
 app.get('/add-blog', (req, res) => {
@@ -132,12 +155,8 @@ app.get('/add-blog', (req, res) => {
   const blog = new Blog(req.body);
 
   blog.save()
-    .then(result => {
-      res.send(result);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    .then(result => res.send(result))
+    .catch(err => console.log(err));
 });
 
 app.post('/post', (req, res) => {

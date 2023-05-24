@@ -1,0 +1,50 @@
+<html lang="en">
+<%- include("./partials/head.ejs") %>
+
+  <body>
+    <%- include("./partials/nav.ejs") %>
+
+      <div class="details content">
+        <h2>
+          <%= blog.title %>
+        </h2>
+        <div class="content">
+          <p>
+            <%= blog.body %>
+          </p>
+          <p>
+            <%= blog.createdAt %>
+          </p>
+        </div>
+        <a class="delete" data-doc="<%= blog._id %>">delete</a>
+      </div>
+
+      <%- include("./partials/footer.ejs") %>
+
+        <script>
+          const trashcan = document.querySelector('a.delete');
+
+          trashcan.addEventListener('click', (e) => {
+            const endpoint = `/blogs/${trashcan.dataset.doc}`;
+
+            fetch(endpoint, { method: 'DELETE' })
+              .then(responseFromServer => {
+                console.log(responseFromServer);
+                // .json() is a method that comes with the server response... 
+                // JS native method would be JSON.parse()
+                const d = responseFromServer.json();
+                // console.log(d);
+                return d; // passes to next .then()
+              })
+              .then(data => {
+                // console.log(data);
+                // console.log(window.location.href);
+                window.location.href = data.backtoblogs;
+              })
+              .catch(err => console.log(err));
+          });
+
+        </script>
+  </body>
+
+</html>
