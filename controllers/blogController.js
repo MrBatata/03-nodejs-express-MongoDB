@@ -6,7 +6,7 @@ const Blog = require('../models/blog');
 const blog_index = (req, res) => {
   Blog.find().sort({ createdAt: -1 })
     .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs' });
+      res.render('blogs/index', { blogs: result, title: 'All blogs' });
     })
     .catch(err => {
       console.log(err);
@@ -20,10 +20,11 @@ const blog_details = (req, res) => {
   Blog.findById(id)
     .then(result => {
       // console.log(result);
-      res.render('details', { blog: result, title: 'Selected Blog' });
+      res.render('blogs/details', { blog: result, title: 'Selected Blog' });
     })
     .catch(err => {
       console.log(err);
+      res.render('404', {title: 'Blog not found'})
     });
 };
 
@@ -31,7 +32,7 @@ const blog_details = (req, res) => {
  * as it is a request inside "/blogs"
  */
 const blog_create_get = (req, res) => {
-  res.render('create', { title: 'Create a new blog' });
+  res.render('blogs/create', { title: 'Create a new blog' });
 };
 
 /** Creates a new blog from form input and submittion */
