@@ -1,13 +1,13 @@
 const express = require('express');
-
 /** Morgan middleware: logger
  * 3rd party middleware
  */
 const morgan = require('morgan');
-
 /** Mongoose: easier to use mongodb */
 const mongoose = require('mongoose');
-const Blog = require('./models/blog');
+// const Blog = require('./models/blog');
+/** Express Routes */
+const blogRoutes = require('./routes/blogRoutes');
 
 /** Express app */
 const app = express();
@@ -38,31 +38,28 @@ app.set('view engine', 'ejs');
  * Now we are able to access 'public' from browser
  */
 app.use(express.static('public'));
-
 /** Express middlewares - data from forms */
 app.use(express.urlencoded({ extended: true }))
-
-/** Custom middleware */
-app.use((req, res, next) => {
-  // console.log('new request made:');
-  // console.log('host: ', req.hostname);
-  // console.log('path: ', req.path);
-  // console.log('method: ', req.method);
-  // Need a command to escape the .use()
-  next();
-});
-
-app.use((req, res, next) => {
-  // console.log('in the next middleware');
-  next();
-});
-
 /** Morgan middleware
  * consoles log response status and ms
- */
+*/
 app.use(morgan('dev'));
+/** Custom middleware */
+// app.use((req, res, next) => {
+//   console.log('new request made:');
+//   console.log('host: ', req.hostname);
+//   console.log('path: ', req.path);
+//   console.log('method: ', req.method);
+//   // Need a command to escape the .use()
+//   next();
+// });
 
-/** Routes
+// app.use((req, res, next) => {
+//   console.log('in the next middleware');
+//   next();
+// });
+
+/** Home route
  * Express automatically sets server statusCode and setHeader Content-Type
  */
 app.get('/', (req, res) => {
@@ -72,97 +69,97 @@ app.get('/', (req, res) => {
 /** Middleware won't be executed if req to '/'
  * As the response would stop the code execution
  */
-app.use((req, res, next) => {
-  // console.log('not showed if in home');
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('not showed if in home');
+//   next();
+// });
 
-/** Routes continue */
+/** About route */
 app.get('/about', (req, res) => {
   res.render('about', { title: 'About' });
 });
 
-app.get('/blogs/create', (req, res) => {
-  res.render('create', { title: 'Create a new blog' });
-});
+/** Blogs routes methods (GET, POST,)
+ * ! All blogs routes deleted and now handled on blog router
+ */
+app.use('/blogs', blogRoutes);
+// app.get('/blogs', (req, res) => {
+//   Blog.find().sort({ createdAt: -1 })
+//     .then(result => {
+//       res.render('index', { blogs: result, title: 'All blogs' });
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// });
 
-/** Blogs route */
-app.get('/blogs', (req, res) => {
-  Blog.find().sort({ createdAt: -1 })
-    .then(result => {
-      res.render('index', { blogs: result, title: 'All blogs' });
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+// app.get('/blogs/:id', (req, res) => {
+//   const id = req.params.id;
+//   // console.log(id);
+//   Blog.findById(id)
+//     .then(result => {
+//       // console.log(result);
+//       res.render('details', { blog: result, title: 'Selected Blog' });
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// });
 
-app.post('/blogs', (req, res) => {
-  // previously need express middleware to handle body
-  // console.log(req.body);
-  const blog = new Blog({
-    title: req.body.title,
-    snippet: req.body.snippet,
-    body: req.body.body
-  });
+// app.get('/blogs/create', (req, res) => {
+//   res.render('create', { title: 'Create a new blog' });
+// });
 
-  blog.save()
-    .then(result => {
-      // res.send(result); // we don't want to show the created blog object on the brower
-      // blog and response are the same
-      // console.log('sent response', result);
-      // console.log('created blog', blog);
-      // console.log(blog === result);
-      res.redirect('/blogs');
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+// app.post('/blogs', (req, res) => {
+//   // previously need express middleware to handle body
+//   // console.log(req.body);
+//   // const blog = new Blog({
+//   //   title: req.body.title,
+//   //   snippet: req.body.snippet,
+//   //   body: req.body.body
+//   // });
+//   const blog = new Blog(req.body);
 
-app.get('/blogs/:id', (req, res) => {
-  const id = req.params.id;
-  // console.log(id);
-  Blog.findById(id)
-    .then(result => {
-      // console.log(result);
-      res.render('details', { blog: result, title: 'Selected Blog' });
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+//   blog.save()
+//     .then(result => {
+//       // res.send(result); // we don't want to show the created blog object on the brower
+//       // blog and response are the same
+//       // console.log('sent response', result);
+//       // console.log('created blog', blog);
+//       // console.log(blog === result);
+//       res.redirect('/blogs');
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// });
 
-app.delete('/blogs/:id', (req, res) => {
-  const id = req.params.id;
+// app.delete('/blogs/:id', (req, res) => {
+//   const id = req.params.id;
 
-  Blog.findByIdAndDelete(id)
-    .then(result => {
-      res.json({ backtoblogs: '/blogs' });
-    })
-    .catch(err => console.log(err));
-});
+//   Blog.findByIdAndDelete(id)
+//     .then(result => {
+//       res.json({ backtoblogs: '/blogs' });
+//     })
+//     .catch(err => console.log(err));
+// });
 
-/** Interact with mongo & mongoose */
-app.get('/add-blog', (req, res) => {
-  // const blog = new Blog({
-  //   title: 'new blog',
-  //   snippet: 'about my new blog',
-  //   body: 'more about my new blog'
-  // })
+/** Testing some custom routes methods... */
+// app.get('/add-blog', (req, res) => {
+//   const blog = new Blog({
+//     title: 'new blog',
+//     snippet: 'about my new blog',
+//     body: 'more about my new blog'
+//   })
 
-  // same as...
-  const blog = new Blog(req.body);
+//   blog.save()
+//     .then(result => res.send(result))
+//     .catch(err => console.log(err));
+// });
 
-  blog.save()
-    .then(result => res.send(result))
-    .catch(err => console.log(err));
-});
-
-app.post('/post', (req, res) => {
-  console.log('hi');
-})
-
+// app.post('/post', (req, res) => {
+//   console.log('hi');
+// });
 
 // app.get('/all-blogs', (req, res) => {
 //   Blog.find()
@@ -184,7 +181,7 @@ app.post('/post', (req, res) => {
 //     });
 // });
 
-/** 404 page */
+/** 404 route */
 app.use((req, res) => {
   res.status(404).render('404', { title: '404' });
 });
